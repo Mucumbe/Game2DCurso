@@ -1,20 +1,26 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-/**
- *
- * @author Spring_Boot
- */
+import JGames2D.JGEngine;
+import cena.CenaAbertura;
+import cena.CenaMenu;
+
 public class Principal {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        // TODO code application logic here
+
+        //INSTANCIA UM OBJECTO DE MOTOR
+        JGEngine motor = new JGEngine();
+
+        //CONFIGURA AS OPCOES DE JANELA DE EXECUCAO DO GAME
+        //ATRAVEZ DO GERENTE DA JANELA DO MOTOR
+        motor.windowManager.setResolution(800, 600, 32);
+        motor.windowManager.setfullScreen(false);
+        
+        //REGISTA UMA CENA AO MOTOR GRAFICO
+        motor.addLevel(new CenaAbertura());// CODIGO 0
+        motor.addLevel(new CenaMenu());// CODIGO 1
+        
+        //INICIA A EXECUCAO DO MOTOR
+        motor.start();
     }
-    
+
 }
