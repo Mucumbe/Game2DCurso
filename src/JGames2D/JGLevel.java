@@ -8,6 +8,7 @@
 //Package declaration
 package JGames2D;
 
+import java.awt.Color;
 import java.net.URL;
 //Used packages
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public abstract class JGLevel
 	//Class attributes
 	public ArrayList<JGLayer> vetLayers = null;
 	public ArrayList<JGSprite> vetSprites = null;
+	public ArrayList<JGFont> vetFonts = null;
 	protected JGEngine gameManager = null;
 	
 	/***********************************************************
@@ -29,6 +31,21 @@ public abstract class JGLevel
 	{
 		vetLayers = new ArrayList<JGLayer>();
 		vetSprites = new ArrayList<JGSprite>();
+		vetFonts = new ArrayList<JGFont>();
+	}
+	
+	/***********************************************************
+	*Name: JGLevel
+	*Description: constructor
+	*Parameters: JGGameManager
+	*Return: none
+	************************************************************/
+	public JGLevel(JGEngine gameManager)
+	{
+		this.gameManager = gameManager;
+		vetLayers = new ArrayList<JGLayer>();
+		vetSprites = new ArrayList<JGSprite>();
+		vetFonts = new ArrayList<JGFont>();
 	}
 	
 	/***********************************************************
@@ -83,6 +100,15 @@ public abstract class JGLevel
 				sprite.render();
 			}
 		}
+		
+		//Renderiza as fontes
+		for (JGFont font : vetFonts)
+		{
+			if (font.autoRender)
+			{
+				font.render();
+			}
+		}
 	}
 	
 	/***********************************************************
@@ -104,6 +130,25 @@ public abstract class JGLevel
 		{
 			sprite.updateSprite();
 		}
+	}
+	
+	/***********************************************************
+	*Name: createFont()
+	*Description: create a Font
+	*Parameters: JGVector2D, boolean
+	*Return: JGLayer
+	************************************************************/
+	public JGFont createFont(String type, Color color, int size, boolean bold, boolean italic )
+	{
+		JGFont font = new JGFont(type, color, size, italic, bold, gameManager);
+		
+		if (font != null)
+		{
+			vetFonts.add(font);
+			return font;
+		}
+		
+		return null;
 	}
 	
 	/***********************************************************
@@ -193,10 +238,18 @@ public abstract class JGLevel
 			layer.free();
 		}
 		vetLayers.clear();
+		
+		//Libera as fontes
+		for (JGFont font : vetFonts)
+		{
+			font.free();
+		}
+		vetFonts.clear();
 	}
 	
 	public void finalize()
 	{
+		vetFonts = null;
 		vetLayers = null;
 		vetSprites = null;
 		gameManager = null;

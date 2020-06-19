@@ -233,7 +233,7 @@ public class JGWindowManager extends JFrame
 	
 	/***********************************************************
 	*Name: paint()
-	*Description: m�todo da classe JFrame que repinta a janela
+	*Description: metodo da classe JFrame que repinta a janela
 	*Parametros: Graphics2D
 	*
 	*
