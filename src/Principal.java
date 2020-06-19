@@ -27,7 +27,7 @@ public class Principal {
         motor.windowManager.setfullScreen(false);
 
         //REGISTA UMA CENA AO MOTOR GRAFICO
-        motor.addLevel(new CenaAbertura(ABERTURA, MENU, GAME, CONTROLES, CREDITOS)); //CODIGO 0
+        motor.addLevel(new CenaAbertura()); //CODIGO 0
         motor.addLevel(new CenaMenu());     //CODIGO 1
         motor.addLevel(new CenaGame());     //CODIGO 2
         motor.addLevel(new CenaControles());//CODIGO 3

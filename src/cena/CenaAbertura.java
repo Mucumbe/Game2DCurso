@@ -9,11 +9,11 @@ import java.awt.event.KeyEvent;
 
 public class CenaAbertura extends JGLevel {
 
-    public final byte ABERTURA;
-    public final byte MENU;
-    public final byte GAME;
-    public final byte CONTROLES;
-    public final byte CREDITOS;
+    public static final byte ABERTURA   = 0;
+    public static final byte MENU       = 1;
+    public static final byte GAME       = 2;
+    public static final byte CONTROLES  = 3;
+    public static final byte CREDITOS   = 4;
 
     //DECLARA UMA VARIAVEL PARA UM OBJECTO DE TEMPO
     JGTimer tempo = null;
@@ -22,13 +22,7 @@ public class CenaAbertura extends JGLevel {
     //INSTACIA DE CLASSE COM CONTROLES DA CENAABERTURA
     CaminhoURL abtCtl = new CaminhoURL();
 
-    public CenaAbertura(byte ABERTURA, byte MENU, byte GAME, byte CONTROLES, byte CREDITOS) {
-        this.ABERTURA = ABERTURA;
-        this.MENU = MENU;
-        this.GAME = GAME;
-        this.CONTROLES = CONTROLES;
-        this.CREDITOS = CREDITOS;
-    }
+   
 
     @Override
     public void execute() {
