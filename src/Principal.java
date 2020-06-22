@@ -9,13 +9,6 @@ import cena.CenaMenu;
 
 public class Principal {
 
-    //CONSTANTES PUBLICAS DAS CLASSE
-    public static final byte ABERTURA   = 0;
-    public static final byte MENU       = 1;
-    public static final byte GAME       = 2;
-    public static final byte CONTROLES  = 3;
-    public static final byte CREDITOS   = 4;
-
     public static void main(String[] args) {
 
         //INSTANCIA UM OBJECTO DE MOTOR
