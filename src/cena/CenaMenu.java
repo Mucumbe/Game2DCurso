@@ -1,6 +1,8 @@
 package cena;
 
 import JGames2D.JGLevel;
+import JGames2D.JGSoundEffect;
+import JGames2D.JGSoundManager;
 import JGames2D.JGSprite;
 import controladores.CaminhoURL;
 import java.awt.Color;
@@ -15,6 +17,14 @@ public class CenaMenu extends JGLevel {
     JGSprite ponteiro = null;
     JGSprite[] botoes = new JGSprite[4];
     String[] nomes = {"btn_play", "btn_controls", "btn_credits", "btn_exit"};
+    JGSoundEffect clic=null;
+    JGSoundEffect select=null;
+    //DEFINE O CONTRUTOR PADRAO SEM PARAMETROS DA CENA
+    public CenaMenu() {
+        
+        clic=JGSoundManager.loadSoundEffect(url.criaURL("/Sounds/toc.wav"));
+         select=JGSoundManager.loadSoundEffect(url.criaURL("/Sounds/click.wav"));
+    }
 
     @Override
     public void execute() {
@@ -27,25 +37,34 @@ public class CenaMenu extends JGLevel {
         for (byte indece = 0; indece < botoes.length; indece++) {
             if (ponteiro.collide(botoes[indece])) {
                 //SE MOUSE SOBRE O BOTAO (ANIMACAO 1 - QUADRO AMARELO)
-                botoes[indece].setCurrentAnimation(1);
+                
+                if (botoes[indece].getCurrentAnimationIndex()!=1) {
+                    botoes[indece].setCurrentAnimation(1);
+                    clic.play();
+                }
+                
 
                 //SE OUVER UM CLICK NA TELA
                 if (gameManager.inputManager.mouseClicked()) {
                     switch (indece) {
 
                         case 0:
-                           gameManager.setCurrentLevel(CenaAbertura.GAME);
-                           return;
+                            select.play();
+                            gameManager.setCurrentLevel(CenaAbertura.GAME);
+                            return;
                         case 1:
                             //CHAMA A TELA DE CONTROLES
+                            select.play();
                             gameManager.setCurrentLevel(CenaAbertura.CONTROLES);
                             return;
-                            
+
                         case 2:
+                            select.play();
                             //CHAMA A TELA DE CREDITOS
                             gameManager.setCurrentLevel(CenaAbertura.CREDITOS);
                             return;
                         case 3:
+                            select.play();
                             //PROGRAMAR A SAIDA DO JOGO
                             gameManager.finish();
                             break;

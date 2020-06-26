@@ -2,6 +2,9 @@ package cena;
 
 import JGames2D.JGLayer;
 import JGames2D.JGLevel;
+import JGames2D.JGMusic;
+import JGames2D.JGSoundEffect;
+import JGames2D.JGSoundManager;
 import JGames2D.JGSprite;
 import JGames2D.JGTimer;
 import JGames2D.JGVector2D;
@@ -20,18 +23,116 @@ public class CenaGame extends JGLevel {
 
     ArrayList<JGSprite> vetTiros = null;
     ArrayList<JGSprite> vetInimigos = null;
+    ArrayList<JGSprite> vetExplosoes = null;
 
     Random sorteio = new Random();
 
     JGTimer tempoInimigo = null;
     JGTimer tempoTiro = null;
+    JGTimer tempoRecuperacao = null;
+
+    JGSoundEffect tiro = null;
+    JGSoundEffect explosao = null;
+    JGMusic musica = null;
+
+    int totalVidas = 2;
+
+    boolean gameOver = false;
+
+    //CONSTRUTOR
+    public CenaGame() {
+        musica = JGSoundManager.loadMusic(url.criaURL("/Sounds/DangerZone.mp3"));
+        tiro = JGSoundManager.loadSoundEffect(url.criaURL("/Sounds/SHOT.wav"));
+        explosao = JGSoundManager.loadSoundEffect(url.criaURL("/Sounds/boom.wav"));
+    }
+
+    //VERIFICA SE O JOGADOR FOI ANTIGIDO COM UM DOS INIMIGOS
+    void clisaoJogadorInimigos() {
+
+        tempoRecuperacao.update();
+        //ACTUALIZA TEMPO DE RECUPERACAO
+        if (tempoRecuperacao.isTimeEnded() == false) {
+            aviao.visible = !aviao.visible;
+            return;
+        } else {
+            aviao.visible = true;
+        }
+
+        for (JGSprite inimigo : vetInimigos) {
+            if (inimigo.visible && inimigo.collide(aviao)) {
+                tempoRecuperacao.restart(3000);
+                inimigo.visible = false;
+                totalVidas--;
+                if (totalVidas == 0) {
+                    gameOver = true;
+                }
+                break;
+            }
+        }
+    }
+
+    //METODO QUE ACTUALIZA AS EXPLOSOES
+    private void actualizaExplosao() {
+
+        for (JGSprite explosao : vetExplosoes) {
+            if (explosao.getCurrentAnimation().isEnded()) {
+                explosao.visible = false;
+            }
+        }
+    }
+
+    //METODO QUE CRIA UMA EXPLOSAO NA TELA
+    private void criarExplosao(int posX, int posY) {
+
+        JGSprite novaExplosao = null;
+        //DISPARA O SOM DA EXPLOSAO
+        explosao.play();
+        //VERIFICA SE É POSSIVEL RECICLAR NOVA EXPLOSAO
+        for (JGSprite explosao : vetExplosoes) {
+            if (explosao.visible) {
+                //FAZ COPIA, TORNA A EXPLOSAO VISIVEL E REINICIA A ANIMACAO
+                novaExplosao = explosao;
+                explosao.visible = true;
+                explosao.restartAnimation();
+                break;
+            }
+        }
+        //VERIFICA SE FOI POSIVEL RCICLAR
+        if (novaExplosao == null) {
+            //CRIA UM NOVO SPRITE,ADICIONA ANIMACAO(FINITA) E ADICIONA AO VECTOR
+            novaExplosao = createSprite(url.criaURL("/Images/spr_bigexplosion.png"), 2, 4);
+            novaExplosao.addAnimation(10, false, 0, 7);
+            vetExplosoes.add(novaExplosao);
+        }
+        //CONFIGURA A POSSICAO DA EXPLOSAO
+        novaExplosao.position.setXY(posX, posY);
+
+    }
+
+    //METODO TESTA A COLISAO ENTRE TIROS E INIMIGOS
+    private void colisaoTiroInimigo() {
+
+        for (JGSprite inimigo : vetInimigos) {
+            for (JGSprite tiro : vetTiros) {
+                //VERIFICA SE TIRO E INIMIGO ESTAO VISIVEL
+                //VERIFICA SE O TIRO ESTA COLIDINDO COM INIMIGO
+                if (tiro.visible && inimigo.visible && tiro.collide(inimigo)) {
+
+                    tiro.visible = false;
+                    inimigo.visible = false;
+                    criarExplosao((int) inimigo.position.getX(), (int) inimigo.position.getY());
+                    break;
+                }
+            }
+        }
+    }
 
     //METODO QUE ACTUALIZA A POSICAO DOS INIMIGOS
     private void actualizaInimigos() {
 
         //LOOP QUE PASSA POR TODOS OS INIMIGOS DO VECTOR
         for (JGSprite inimigo : vetInimigos) {
-            
+
             if (inimigo.position.getY() > gameManager.windowManager.height + inimigo.frameHeight / 2) {
                 inimigo.visible = false;
             } else {
@@ -114,6 +215,8 @@ public class CenaGame extends JGLevel {
     private void criaTiro() {
         JGSprite novoTiro = null;
 
+        //DISPARA O SOM DE TIRO
+        tiro.play();
         //VERIFICA SE EXISTE ALGUM SPRTE COM VISIBILIDADE FALSA E REAPROVEITA
         for (JGSprite tiro : vetTiros) {
 
@@ -146,33 +249,57 @@ public class CenaGame extends JGLevel {
         //SE O JOGADOR APERTAR ESC DURANTE O JOGO,VOLTA PARA CENA MENU
         if (gameManager.inputManager.keyTyped(KeyEvent.VK_ESCAPE)) {
             gameManager.setCurrentLevel(CenaAbertura.MENU);
+            musica.stop();
             return;
         }
-        //METODO QUE CONTROLA OS MOVIMENTOS DO JOGADOR
-        controlador();
+
         //CHA O METOD QUE ACTUALIZA A POSICA DOS TIROS
         actualizaTitos();
-
         //CHAMA O METODO QUE CRIA INIMIGO
         criaInimigo();
         //CHAMA O METODO QUE ACTUALIZA INIMIGO
         actualizaInimigos();
+        //CHAMA METODO QUE TESTA COLISAO TIRO INIMIGO
+        colisaoTiroInimigo();
+        //VERICA GAME OVER
+        //CHAMA O METODO QUE ACTUALIZA AS EXPLOSOES
+        actualizaExplosao();
+        if (gameOver == true) {
+            musica.stop();
+            return;
+        }
+        //METODO QUE CONTROLA OS MOVIMENTOS DO JOGADOR
+        controlador();
+        //CHAMA O METODO QUE VERIFICA SE O JOGADOR FOI ATIGIDO
+        clisaoJogadorInimigos();
     }
 
     @Override
     public void init() {
 
+        //INICIALIZA TOTAL DE VIDAS
+        totalVidas = 3;
+        
+        //INICIALIZA GAME OVER COM FALSE
+        gameOver=false;
+
+        //INICIA A REPRODUCAO DA MUSICA
+        musica.setNumberOfLoops(-1);
+        musica.play();
         //CRIA O OBJECTO QUE MARCA O TEMPO NECESSARIO PARA NOVO TIRO
         tempoTiro = new JGTimer(500);
         tempoInimigo = new JGTimer(1900);
+        tempoRecuperacao = new JGTimer(0);
 
-        //CARREGA O SPRITE CONTENDO A IMAGEM DO TIRO
+        //CARREGA Os SPRITE CONTENDO A IMAGEM DO TIRO,INIMIGO E EXPLOSAO
         createSprite(url.criaURL("/Images/spr_shot.png"), 1, 1).visible = false;
         createSprite(url.criaURL("/Images/spr_enemy.png"), 1, 4).visible = false;
+        createSprite(url.criaURL("/Images/spr_bigexplosion.png"), 2, 4).visible = false;
 
         //INSTANCIA O VETOR DE SPRITE PARA ARMAZENAR TIROS
         vetTiros = new ArrayList<JGSprite>();
         vetInimigos = new ArrayList<JGSprite>();
+        vetExplosoes = new ArrayList<JGSprite>();
 
         //CARREGA O SPRITE DO JOGADOR
         aviao = this.createSprite(url.criaURL("/Images/spr_airplane.png"), 1, 4);
@@ -221,7 +348,6 @@ public class CenaGame extends JGLevel {
                 criaTiro();
                 tempoTiro.restart();
             }
-
         }
         //CONTROLA A DIRECCAO DO JOGADOR EM X
         if (gameManager.inputManager.keyPressed(KeyEvent.VK_LEFT)) {
@@ -250,7 +376,5 @@ public class CenaGame extends JGLevel {
         } else if (aviao.position.getY() > (gameManager.windowManager.height - aviao.frameHeight / 2 + 4)) {
             aviao.position.setY(gameManager.windowManager.height - aviao.frameHeight / 2 + 4);
         }
-
     }
-
 }
